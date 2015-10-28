@@ -72,7 +72,7 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	// Returns the size of the list
-	public int size() {
+	public synchronized int size() {
 		if (head == null) {
 			return 0;
 		} else {
@@ -87,12 +87,12 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	// Checks if the list is empty
-	public boolean isEmpty() {
+	public synchronized boolean isEmpty() {
 		return (size() == 0);
 	}
 
 	// Deletes all the nodes in the list
-	public void clear() {
+	public synchronized void clear() {
 		head = tail = null;
 
 		// What if the merge sort is running now in a thread
@@ -101,7 +101,7 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	// Adds a new node to the list at the end (tail)
-	public LinkedList<T> append(T t) {
+	public synchronized LinkedList<T> append(T t) {
 		if (t == null) {
 			throw new NullPointerException("Cannot insert null element.");
 		}
@@ -119,7 +119,7 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	// Gets a node's value at a specific index
-	public T get(int index) {
+	public synchronized T get(int index) {
 		Node<T> found = head;
 		for (int i = 0; i < size(); i++) {
 			if (found == null) {
@@ -131,7 +131,7 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	@Override
-	public Iterator<T> iterator() {
+	public synchronized Iterator<T> iterator() { 		//TODO: Does this need to be synchronized?
 		Iterator<T> it = new Iterator<T>() {
 			private Node<T> currentNode = head;
 
@@ -162,7 +162,7 @@ public class LinkedList<T> implements Iterable<T> {
 	// (we only have merge sort in this assignment)
 
 	// Sorts the link list in serial
-	private void sort(Comparator<T> comp) {
+	private void sort(Comparator<T> comp) {				//TODO: Does this need to be synchronized?
 
 		new MergeSort<T>(comp).sort(this); // Run this within the critical
 											// section (as discussed before)
@@ -172,7 +172,7 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	// Sorts the link list in parallel (using multiple threads)
-	private void par_sort(Comparator<T> comp) {
+	private void par_sort(Comparator<T> comp) { 			//TODO: Does this need to be synchronized?
 		new MergeSort<T>(comp).parallel_sort(this); // Run this within the
 													// critical section (as
 													// discussed before)
@@ -183,9 +183,9 @@ public class LinkedList<T> implements Iterable<T> {
 
 		// Variables (attributes)
 		// ExecutorService
-		// Depth limit
+		// Depth limit									//TODO: How do you get the depth limit?
 
-		ExecutorService eService;
+		ExecutorService eService; 
 		
 		// Comparison function
 		final Comparator<T> comp;
@@ -203,11 +203,19 @@ public class LinkedList<T> implements Iterable<T> {
 		// attributes (head and tail pointers)
 
 		public void sort(LinkedList<T> list) {
-			LinkedList<T> sortedList = mergeSort(list);
-			list.head = sortedList.head;
+			LinkedList<T> result = mergeSort(list);
+			list.head = result.head;
 		}
 
-		public void parallel_sort(LinkedList<T> list) { 
+		public void parallel_sort(LinkedList<T> list) {  	
+			try {
+				eService = Executors.newCachedThreadPool(); 	//TODO: Is this a cached thread pool?
+				LinkedList<T> result = parallel_mergesort(list, 1);  			
+				list.head = result.head;   
+				eService.shutdown(); 							//TODO: This necessary?
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			} 
 		}
 
 		// #########
@@ -219,8 +227,30 @@ public class LinkedList<T> implements Iterable<T> {
 		// Merge sort each part
 		// Merge the two sorted parts together
 
-		public LinkedList<T> parallel_mergesort(LinkedList<T> list, int threadCount) {
-			return list; 
+		public LinkedList<T> parallel_mergesort(LinkedList<T> list, int threadCount) throws InterruptedException, ExecutionException {
+			if (threadCount <= 1) { 
+				mergeSort(list);
+			} 
+			
+			Pair<LinkedList<T>, LinkedList<T>> splitLists = split(list); 
+			LinkedList<T> firstPart = splitLists.fst(); 
+			LinkedList<T> secondPart = splitLists.snd(); 
+			
+			Future<LinkedList<T>> futurePartOne = eService.submit(new Callable<LinkedList<T>>(){ 
+			    public LinkedList<T> call() throws Exception {
+			    	return parallel_mergesort(firstPart, threadCount/2); 			//Should it be divides by two?
+			    }
+			});
+
+			Future<LinkedList<T>> futurePartTwo = eService.submit(new Callable<LinkedList<T>>(){ 	
+			    public LinkedList<T> call() throws Exception {
+			    	return parallel_mergesort(secondPart, threadCount/2); 			//Should it be divides by two?
+			    }
+			});
+			
+				LinkedList<T> sortedFirst = futurePartOne.get(); 					
+				LinkedList<T> sortedSecond = futurePartTwo.get() ;  				
+				return merge(sortedFirst, sortedSecond);
 		}
 		
 		public LinkedList<T> mergeSort(LinkedList<T> list) {

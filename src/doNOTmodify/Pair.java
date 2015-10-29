@@ -1,4 +1,4 @@
-package doNotModify;
+package doNOTmodify;
 
 public class Pair<A, B>{
     final A a;

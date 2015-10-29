@@ -20,7 +20,7 @@ public class RandomTests {
         }
 
         long start = System.currentTimeMillis();
-        LinkedList.sort(list);
+        LinkedList.par_sort(list);
         long end = System.currentTimeMillis();
 
         System.err.println();

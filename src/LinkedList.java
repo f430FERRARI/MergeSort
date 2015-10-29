@@ -131,12 +131,15 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	@Override
-	public synchronized Iterator<T> iterator() { 		//TODO: Does this need to be synchronized?
+	public Iterator<T> iterator() { 		//TODO: Does this need to be synchronized?
 		Iterator<T> it = new Iterator<T>() {
 			private Node<T> currentNode = head;
 
 			@Override
 			public boolean hasNext() {
+				if (head == null) { 
+					return false;
+				}
 				return (currentNode.next != null);
 			}
 

@@ -59,7 +59,7 @@ public class RandomTests {
                 list.append(rval);
             }
 
-            LinkedList.sort(list);
+            LinkedList.par_sort(list);
 
             int i = 0;
             Integer prev = Integer.MIN_VALUE;
@@ -86,7 +86,7 @@ public class RandomTests {
             list.append(input[i]);
         }
 
-        LinkedList.sort(list);
+        LinkedList.par_sort(list);
 
         int i = 0;
         Integer prev = Integer.MIN_VALUE;

@@ -20,7 +20,7 @@ public class RandomTests {
         }
 
         long start = System.currentTimeMillis();
-        LinkedList.par_sort(list);
+        LinkedList.sort(list);
         long end = System.currentTimeMillis();
 
         System.err.println();
@@ -59,7 +59,7 @@ public class RandomTests {
                 list.append(rval);
             }
 
-            LinkedList.par_sort(list);
+            LinkedList.sort(list);
 
             int i = 0;
             Integer prev = Integer.MIN_VALUE;
@@ -86,7 +86,7 @@ public class RandomTests {
             list.append(input[i]);
         }
 
-        LinkedList.par_sort(list);
+        LinkedList.sort(list);
 
         int i = 0;
         Integer prev = Integer.MIN_VALUE;

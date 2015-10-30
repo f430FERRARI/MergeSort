@@ -1,5 +1,6 @@
-//package cpsc457;
-//import cpsc457.doNOTmodify.Pair;
+package cpsc457;
+
+import cpsc457.doNOTmodify.Pair;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -11,22 +12,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import doNOTmodify.Pair;
-
 public class LinkedList<T> implements Iterable<T> {
-
-	// TODO: Delete this
-	public void print() {
-		Node<T> currentNode = head;
-		if (head == null) {
-			throw new NullPointerException();
-		} else {
-			while (currentNode != null) {
-				System.out.println(currentNode.data);
-				currentNode = currentNode.next;
-			}
-		}
-	}
 
 	// ####################
 	// # Static Functions #
@@ -146,7 +132,7 @@ public class LinkedList<T> implements Iterable<T> {
 	}
 
 	@Override
-	public Iterator<T> iterator() { // TODO: Does this need to be synchronized?
+	public Iterator<T> iterator() { 
 		Iterator<T> it = new Iterator<T>() {
 			private Node<T> currentNode = head;
 
@@ -180,18 +166,12 @@ public class LinkedList<T> implements Iterable<T> {
 
 	// Sorts the link list in serial
 	private void sort(Comparator<T> comp) {
-		new MergeSort<T>(comp).sort(this); // Run this within the critical
-											// section (as discussed before)
-
-		// It might not allow you to use this inside critical
-		// Create a final pointer = this then use that pointer
+		new MergeSort<T>(comp).sort(this); 
 	}
 
 	// Sorts the link list in parallel (using multiple threads)
 	private void par_sort(Comparator<T> comp) {
-		new MergeSort<T>(comp).parallel_sort(this); // Run this within the
-													// critical section (as
-													// discussed before)
+		new MergeSort<T>(comp).parallel_sort(this); 
 	}
 
 	// Merge sort
@@ -224,7 +204,7 @@ public class LinkedList<T> implements Iterable<T> {
 				return;
 			}
 			
-			int threadCount = 8;
+			int threadCount = 4;
 			int depth = (int) Math.floor(Math.log10(threadCount) / Math.log10(2));
 
 			try {
